@@ -1,29 +1,75 @@
 import { useState, useEffect } from "react";
 import Header from "./components/Header";
 import Guitar from "./components/Guitar";
+import db from "./data/db";
 
 function App() {
 
     // State
-    const [auth, setAuth] = useState(false);
-    const [total, setTotal] = useState(0);
+    const [data, setData] = useState(db);
     const [cart, setCart] = useState([]);
+    const MAX_ITEMS = 5;
+    const MIN_ITEMS = 1;
 
-    useEffect(() => {
-        console.log("Componente listo o escuchando por Auth");
-    }, [auth]);
+    function addToCart(item) {
+        const itemExists = cart.findIndex((guitar) => guitar.id === item.id);
 
-    console.log(auth);
+        if (itemExists >= 0) { // existe en el carrito
+            if (cart[itemExists].quantity >= MAX_ITEMS) return; // no se puede agregar mas items
+            const updatedCart = [...cart];
+            updatedCart[itemExists].quantity++;
+            setCart(updatedCart);
+        } else {
+            item.quantity = 1;
+            setCart([...cart, item]);
+        }
+    }
+
+    function removeFromCart(id) {
+        setCart(prevCart => prevCart.filter(guitar => guitar.id !== id));
+    }
+
+    function increaseQuantity(id) {
+        const updatedCart = cart.map(item => {
+            if (item.id === id && item.quantity < MAX_ITEMS) {
+                return {
+                    ...item,
+                    quantity: item.quantity + 1
+                }
+            }
+            return item;
+        });
+
+        setCart(updatedCart);
+    }
+
+    function decreaseQuantity(id) {
+        const updatedCart = cart.map(item => {
+            if (item.id === id && item.quantity > MIN_ITEMS) {
+                return {
+                   ...item,
+                    quantity: item.quantity - 1
+                }
+            }
+            return item;
+        });
+
+        setCart(updatedCart);
+    }
+
+    function clearCart() {
+        setCart([]);
+    }
 
     return (
         <>
-            <Header />
+            <Header cart={cart} removeFromCart={removeFromCart} increaseQuantity={increaseQuantity} decreaseQuantity={decreaseQuantity} clearCart={clearCart} />
 
             <main className="container-xl mt-5">
                 <h2 className="text-center">Nuestra Colección</h2>
 
                 <div className="row mt-5">
-                    <Guitar />
+                    {data.map(guitar => <Guitar key={guitar.id} guitar={guitar} addToCart={addToCart} />)}
                 </div>
             </main>
             <footer className="bg-dark mt-5 py-5">
