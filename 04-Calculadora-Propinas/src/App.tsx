@@ -1,11 +1,13 @@
 import { menuItems } from "./data/db.ts";
 import { MenuItem } from "./components/MenuItem.tsx";
 import useOrder from "./hooks/useOrder.ts";
-import {OrderContents} from "./components/OrderContents.tsx";
+import { OrderContents } from "./components/OrderContents.tsx";
+import { OrderTotals } from "./components/OrderTotals.tsx";
+import { TipPercentajeForm } from "./components/TipPercentajeForm.tsx";
 
 function App() {
 
-    const { order, addItem } = useOrder();
+    const { order, addItem, removeItem, tip, setTip, placeOrder } = useOrder();
 
   return (
     <>
@@ -23,7 +25,17 @@ function App() {
                 </div>
             </div>
             <div className="border border-dashed border-slate-300 p-5 rounded-lg space-y-10">
-                <OrderContents order={order} />
+                {
+                    order.length ? (
+                        <>
+                            <OrderContents order={order} removeItem={removeItem} />
+                            <TipPercentajeForm setTip={setTip} tip={tip} />
+                            <OrderTotals order={order} tip={tip} placeOrder={placeOrder} />
+                        </>
+                    ) : (
+                        <p>La orden está vacía.</p>
+                    )
+                }
             </div>
         </main>
     </>
